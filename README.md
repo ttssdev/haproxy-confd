@@ -1,7 +1,7 @@
-HAProxy combined with confd for HTTP load balancing
-===================================================
+HAProxy combined with confd for HTTP load balancing and path matching
+=====================================================================
 
-This is based on yaronr/haproxy-confd and cstpdk/haproxy-confd
+This is based on yaronr/haproxy-confd and cstpdk/haproxy-confd and xcompass/haproxy-confd
 
 * HAProxy 1.6.x with confd 0.12.0-alpha
 * Uses zero-downtime reconfiguration (e.g - instead of harpy reload, which will drop all connections, will gradually transfer new connections to the new config)
