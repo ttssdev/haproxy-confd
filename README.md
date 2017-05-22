@@ -23,11 +23,13 @@ etcdctl mkdir "/config"
 ```
 
 Depending on your needs, create one or more services or tcp-services.
-For instance, to create an http service with domain *example.org*  and load balancing on servers *1.2.3.4:80* (we'll call it *nodeA*) and *2.3.4.5:80* (called *nodeB*), run these commands:
+For instance, to create an http service with domain *example.org/foo/bar/blech*  and load balancing on servers *1.2.3.4:80* (we'll call it *nodeA*) and *2.3.4.5:80* (called *nodeB*), run these commands:
 ```bash
-etcdctl mkdir "/services/example.org"
-etcdctl set "/services/example.org/upstreams/nodeA" "1.2.3.4:80"
-etcdctl set "/services/example.org/upstreams/nodeB" "2.3.4.5:80"
+etcdctl mkdir "/services/example"
+etcdctl set "/services/example/host" "example.org"
+etcdctl set "/services/example/path" "/foo/bar/blech"
+etcdctl set "/services/example/upstreams/nodeA" "1.2.3.4:80"
+etcdctl set "/services/example/upstreams/nodeB" "2.3.4.5:80"
 ```
 
 ### Enable SSL/HTTP support
@@ -35,7 +37,7 @@ etcdctl set "/services/example.org/upstreams/nodeB" "2.3.4.5:80"
 ```bash
 etcdctl mkdir "/config/services"
 etcdctl set "/config/services/enable_ssl" "true"
-etcdctl set "/services/example.org/scheme" "https"
+etcdctl set "/services/example/scheme" "https"
 ```
 Possible values for scheme are: http (default), https, http-and-https. If scheme is https, all traffic to http for the domain will be redirected to https.
 
@@ -51,7 +53,7 @@ docker run -e ETCD_NODE=http://172.17.42.1:2379 -p 1000:1000 -p 80:80 -p 443:443
 
 To *add an upstream node*, let's say *nodeB2*, *2.3.4.5:90*, you just have to run this, and the configuration should safely be updated !
 ```bash
-etcdctl set "/services/example.org/upstreams/nodeB2" "2.3.4.5:90"
+etcdctl set "/services/example/upstreams/nodeB2" "2.3.4.5:90"
 ```
 
 To *remove an upstream server*, let's say ... *nodeB2* (added by mistake ?), just run
@@ -61,8 +63,7 @@ etcdctl rm "/services/myapp/upstreams/nodeB2"
 
 To *remove a service*, and so a directory, you must type
 ```bash
-etcdctl rmdir "/services/example.org"
+etcdctl rmdir "/services/example"
 ```
 
 The commands for a tcp-service are the same but with *tcp-services* instead of *services*
-

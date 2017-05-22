@@ -1,6 +1,6 @@
 FROM haproxy:1.7.2
 
-MAINTAINER Pan Luo <pan.luo@ubc.ca>
+MAINTAINER Ivo Marino <ivo.marino@ttss.ch>
 
 ENV ETCD_NODE http://172.17.0.1:2379
 ENV confd_ver 0.12.0-alpha3

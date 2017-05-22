@@ -42,11 +42,19 @@ frontend http-in
       {{$scheme := getv $schemedir "http"}}
       {{$upstreamsdir := printf "%%PREFIX%%/services/%s/upstreams" $service}}
 
+      {{$hostdir := printf "%%PREFIX%%/services/%s/host" $service}}
+      {{$host := getv $hostdir "http"}}
+
+      {{$pathdir := printf "%%PREFIX%%/services/%s/path" $service}}
+      {{$path := getv $pathdir "/"}}
+
       {{if ls $upstreamsdir }}
-    acl host_{{$service}} hdr_beg(host) -i {{$service}}
+    acl host_{{$service}}_host hdr(host) -i {{$host}}
+    acl host_{{$service}}_path path_beg -i {{$path}}
     #acl {{$service}}_health path_beg /ping
 
-    use_backend {{$service}} if host_{{$service}}
+    use_backend {{$service}} if host_{{$service}}_host
+    use_backend {{$service}} if host_{{$service}}_host host_{{$service}}_path
     #use_backend {{$service}} if {{$service}}_health
       {{end}}
     {{end}}
