@@ -54,10 +54,18 @@ frontend http-in
     #acl {{$service}}_health path_beg /ping
 
     #use_backend {{$service}} if host_{{$service}}_host
+    {{if ls $hostdir}}
+    {{if ls $pathdir}}
     use_backend {{$service}} if host_{{$service}}_host host_{{$service}}_path
+    {{end}}
+    {{else}}
+    # use_backend {{$service}}
+    {{end}}
     #use_backend {{$service}} if {{$service}}_health
       {{end}}
     {{end}}
+
+    use_backend default
 
 {{if exists "%%PREFIX%%/config/services/enable_ssl"}}
 frontend https-in
@@ -84,9 +92,14 @@ frontend https-in
 {{$schemedir := printf "%%PREFIX%%/services/%s/scheme" $service}}
 {{$scheme := getv $schemedir "http"}}
 {{$upstreamsdir := printf "%%PREFIX%%/services/%s/upstreams" $service}}
+
+{{$pathdir := printf "%%PREFIX%%/services/%s/path" $service}}
+{{$path := getv $pathdir "/"}}
+
 {{if ls $upstreamsdir}}
 backend {{$service}}
     balance leastconn
+    reqirep ^([^\ ]*\ ){{$path}}[/]?(.*)    \1/\2
 
     {{ if eq $scheme "https"}}
     redirect scheme https code 301 if !{ ssl_fc  }
