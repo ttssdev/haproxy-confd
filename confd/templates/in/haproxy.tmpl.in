@@ -49,6 +49,15 @@ frontend http-in
       {{$path := getv $pathdir "/"}}
 
       {{if ls $upstreamsdir }}
+
+      {{if ls $hostdir}}
+      {{if ls $pathdir}}
+    # ACL for {{$service}}
+    acl missing_slash path_end {{$path}}
+    http-request redirect code 301 prefix / drop-query append-slash if missing_slash
+      {{end}}
+      {{end}}
+
     acl host_{{$service}}_host hdr(host) -i {{$host}}
     acl host_{{$service}}_path path_beg -i {{$path}}
     #acl {{$service}}_health path_beg /ping
@@ -93,13 +102,20 @@ frontend https-in
 {{$scheme := getv $schemedir "http"}}
 {{$upstreamsdir := printf "%%PREFIX%%/services/%s/upstreams" $service}}
 
+{{$hostdir := printf "%%PREFIX%%/services/%s/host" $service}}
+{{$host := getv $hostdir "http"}}
+
 {{$pathdir := printf "%%PREFIX%%/services/%s/path" $service}}
 {{$path := getv $pathdir "/"}}
 
 {{if ls $upstreamsdir}}
 backend {{$service}}
     balance leastconn
-    reqirep ^([^\ ]*\ ){{$path}}[/]?(.*)    \1/\2
+    {{if ls $hostdir}}
+    {{if ls $pathdir}}
+    reqirep ^(.*)(\{{$path}}\/?)(.*) \1\ /\3
+    {{end}}
+    {{end}}
 
     {{ if eq $scheme "https"}}
     redirect scheme https code 301 if !{ ssl_fc  }
